@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    private static Board gameBoard;
+    private static Board gameBoard; //надо доделать
 
     public static Board getGameBoard() {
         return gameBoard;
@@ -37,13 +37,13 @@ public class Main {
             // Read and validate the insects
             for(int i = 0; i < N; i++) {
                 String[] text1;
-                text1 = scanner.nextLine().split(" ");
+                text1 = scanner.nextLine().split(" "); //вот тут какая то лажа
                 String color = text1[0];
                 String type = text1[1];
                 int X1 = Integer.parseInt(text1[2]);
                 int Y1 = Integer.parseInt(text1[3]);
                 // Validate the insect
-                if (!color.matches("Red|Green|Blue|Yellow")) {
+                if (!color.matches("Red|Green|Blue|Yellow")) { //нужно здесь вместо этой штуки энам использовать
                     throw new InvalidInsectColorException();
                 }
 
@@ -57,10 +57,9 @@ public class Main {
 
             // Read and validate the food points
             for(int i = 0; i < M; i++) {
-                scanner.next();
                 String[] text2;
-                text2 = scanner.nextLine().split(" ");
-                int amount = Integer.parseInt(text2[0]);
+                text2 = scanner.nextLine().split(" "); //лажа
+                int amount = Integer.parseInt(text2[0]); //не юзается а надо
                 int X2 = Integer.parseInt(text2[1]);
                 int Y2 = Integer.parseInt(text2[2]);
 
@@ -71,9 +70,9 @@ public class Main {
             scanner.close();
             writer.close();
 
-            // Continue with the rest of the program
+            // Continue with the rest of the program ???????
 
-        } catch (IOException e) {
+        } catch (IOException e) { //??????
             e.printStackTrace();
         } catch (InvalidBoardSizeException | InvalidNumberOfInsectException | InvalidNumberOfFoodPointsException |
                  InvalidInsectTypeException | InvalidEntityPositionException | InvalidInsectColorException e) {
@@ -91,6 +90,7 @@ class Board {
         this.boardData = new HashMap<>();
     }
 
+    //как что куда
     public void addEntity(BoardEntity entity) {
         boardData.put(entity.entityPosition.position(), entity);
     }
@@ -99,10 +99,12 @@ class Board {
         return boardData.get(position.toString());
     }
 
+    //принимает насекомое и возвращает направление, которое это насекомое выберет.
     public Direction getDirection(Insect insect) {
         return insect.getBestDirection(boardData, size);
     }
 
+    // вызывает getDirection(), чтобы понять, куда пойдет насекомое, а затем возвращает количество собранной им пищи.
     public int getDirectionSum(Insect insect) {
         return insect.travelDirection(getDirection(insect), boardData, size);
     }
@@ -153,6 +155,7 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
     @Override
     public int travelDirection(Direction dir, Map<String, BoardEntity> boardData, int boardSize) {
         int foodEaten = 0;
+        // эта херня написана слишком дохера раз везде
 
         while (true) {
             // Calculate the best direction
@@ -166,7 +169,7 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
 
             // If the new position contains food, eat it, else stop moving
             if (entityAtNewPosition instanceof FoodPoint) {
-                foodEaten += ((FoodPoint) entityAtNewPosition).value;
+                foodEaten += ((FoodPoint) entityAtNewPosition).value; //вот тут кладет как я поняла
                 boardData.remove(newPosition.toString());
             } else {
                 break;
@@ -532,7 +535,7 @@ class Grasshopper extends Insect {
         return null;
     }
 }
-
+//тут намана
 class EntityPosition {
     private int x, y;
 
@@ -774,7 +777,7 @@ enum Direction {
         this.textRepresentation = text;
     }
 
-    public String getTextRepresentation() {
+    public String getTextRepresentation() { //надо юзать в output.txt
         return this.textRepresentation;
     }
 }
@@ -782,7 +785,7 @@ enum Direction {
 enum InsectColor {
     RED, GREEN, BLUE, YELLOW;
 
-    public static final InsectColor toColor(String s) throws InvalidInsectColorException {
+    public static InsectColor toColor(String s) throws InvalidInsectColorException {
         switch (s.toLowerCase()) {
             case "red":
                 return RED;
