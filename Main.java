@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-
-
 /**
  * The main class. Here we do reading of data of input file, checking and putting them to output file.
  * We use java.io.File for file declaration, java.util.Scanner for reading from input file, java.io.BufferedWriter
@@ -23,7 +21,6 @@ public class Main {
      * List for insects.
      */
     private static LinkedList<EntityPosition> insects = new LinkedList<>();
-
     /**
      * The main method of all program.
      */
@@ -32,6 +29,7 @@ public class Main {
         ArrayList for check of two entities on the same position.
          */
         ArrayList<String> allTheEntities = new ArrayList<>();
+        ArrayList<String> colorName = new ArrayList<>();
         /*
         Initializing of files.
          */
@@ -120,6 +118,17 @@ public class Main {
                 System.exit(0);
             }
             /*
+            Check that we do not have duplicate.
+             */
+            if (!colorName.contains(color + " " + type)) {
+                colorName.add(color + " " + type);
+            } else {
+                writer.write((new DuplicateInsectsException()).getMassage());
+                scanner.close();
+                writer.close();
+                System.exit(0);
+            }
+            /*
             Check that we do not have invalid entity position.
              */
             if (x < 1 || x > d || y < 1 || y > d) {
@@ -128,6 +137,9 @@ public class Main {
                 writer.close();
                 System.exit(0);
             }
+            /*
+            Check that we do not have duplicate.
+             */
             EntityPosition entityPosition = new EntityPosition(x, y);
             InsectColor insectColor = InsectColor.toColor(color);
             switch (type) {
@@ -275,19 +287,21 @@ class Board {
     }
 }
 
-// Ants can move vertically, horizontally, and diagonally.
+/**
+ * Class Ants. Ants can move vertically, horizontally, and diagonally.
+ */
 class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
-
     public Ant(EntityPosition entityPosition, InsectColor color) {
         super(entityPosition, color);
     }
-
 
     @Override
     public Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize) {
         int maxFood = 0;
         Direction bestDirection = Direction.N;
-        // Check each direction
+        /*
+        Check each direction
+         */
         for (Direction dir : Direction.values()) {
             switch (dir) {
                 case N:
@@ -351,7 +365,9 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
             }
 
         }
-        // Otherwise, return the direction with the most food
+        /*
+        Otherwise, return the direction with the most food
+         */
         return bestDirection;
     }
 
@@ -384,7 +400,6 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
         return DiagonalMoving.super.getDiagonalDirectionVisibleValue(dir, entityPosition, boardData, boardSize);
     }
 
-    //
     @Override
     public int travelDiagonally(Direction dir, EntityPosition entityPosition, InsectColor color, Map<String,
             BoardEntity> boardData, int boardSize) {
@@ -394,7 +409,9 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
 
 }
 
-//Butterflies can move only vertically and horizontally.
+/**
+ * Class Butterfly. Butterflies can move only vertically and horizontally.
+ */
 class Butterfly extends Insect implements OrthogonalMoving {
     public Butterfly(EntityPosition entityPosition, InsectColor color) {
         super(entityPosition, color);
@@ -405,7 +422,9 @@ class Butterfly extends Insect implements OrthogonalMoving {
         int maxFood = 0;
         int food;
         Direction bestDirection = Direction.N;
-        // Check each direction
+        /*
+        Check each direction
+         */
         for (Direction dir : Direction.values()) {
             food = getOrthogonalDirectionVisibleValue(dir, getEntityPosition(), boardData, boardSize);
             if (food > maxFood) {
@@ -413,7 +432,9 @@ class Butterfly extends Insect implements OrthogonalMoving {
                 bestDirection = dir;
             }
         }
-        // Otherwise, return the direction with the most food
+        /*
+        Otherwise, return the direction with the most food
+         */
         return bestDirection;
     }
 
@@ -423,7 +444,9 @@ class Butterfly extends Insect implements OrthogonalMoving {
     }
 }
 
-//Spiders can move only diagonally.
+/**
+ * Class Spiders. Spiders can move only diagonally.
+ */
 class Spider extends Insect implements DiagonalMoving {
     public Spider(EntityPosition entityPosition, InsectColor color) {
         super(entityPosition, color);
@@ -432,9 +455,11 @@ class Spider extends Insect implements DiagonalMoving {
     @Override
     public Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize) {
         int maxFood = 0;
-        int food = 0;
+        int food;
         Direction bestDirection = Direction.NE;
-        // Check each direction
+        /*
+        Check each direction
+         */
         for (Direction dir : Direction.values()) {
             food = getDiagonalDirectionVisibleValue(dir, getEntityPosition(), boardData, boardSize);
             if (food > maxFood) {
@@ -442,7 +467,9 @@ class Spider extends Insect implements DiagonalMoving {
                 bestDirection = dir;
             }
         }
-        // Otherwise, return the direction with the most food
+        /*
+        Otherwise, return the direction with the most food
+         */
         return bestDirection;
     }
 
@@ -453,7 +480,9 @@ class Spider extends Insect implements DiagonalMoving {
 
 }
 
-//Grasshoppers can jump only vertically and horizontally but by skipping odd fields.
+/**
+ * Class Grasshopper. Grasshoppers can jump only vertically and horizontally but by skipping odd fields.
+ */
 class Grasshopper extends Insect {
     public Grasshopper(EntityPosition entityPosition, InsectColor color) {
         super(entityPosition, color);
@@ -462,9 +491,11 @@ class Grasshopper extends Insect {
     @Override
     public Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize) {
         int maxFood = 0;
-        int food = 0;
+        int food;
         Direction bestDirection = Direction.N;
-        // Check each direction
+        /*
+        Check each direction
+         */
         for (Direction dir : Direction.values()) {
             food = getOrthogonalDirectionVisibleValue(dir, getEntityPosition(), boardData, boardSize);
             if (food > maxFood) {
@@ -472,7 +503,9 @@ class Grasshopper extends Insect {
                 bestDirection = dir;
             }
         }
-        // Otherwise, return the direction with the most food
+        /*
+        Otherwise, return the direction with the most food
+         */
         return bestDirection;
     }
 
@@ -602,6 +635,9 @@ class Grasshopper extends Insect {
 
 }
 
+/**
+ * Class EntityPosition.
+ */
 class EntityPosition {
     private int x;
     private int y;
@@ -611,19 +647,14 @@ class EntityPosition {
         this.y = y;
     }
 
-    public int getX() { //check it in the end and look are we need that parts of code or no
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
     public String position() {
         return x + " " + y;
     }
 }
 
+/**
+ * Class FoodPoint.
+ */
 class FoodPoint extends BoardEntity {
     protected int value;
 
@@ -633,6 +664,9 @@ class FoodPoint extends BoardEntity {
     }
 }
 
+/**
+ * Exceptions for checking validate.
+ */
 class InvalidInsectColorException extends Exception {
     public String getMassage() {
         return "Invalid insect color";
@@ -681,6 +715,9 @@ class TwoEntitiesOnSamePositionException {
     }
 }
 
+/**
+ * Abstract class BoardEntity.
+ */
 abstract class BoardEntity {
     protected EntityPosition entityPosition;
 
@@ -689,6 +726,9 @@ abstract class BoardEntity {
     }
 }
 
+/**
+ * Abstract class Insect extends BoardEntity.
+ */
 abstract class Insect extends BoardEntity {
     protected InsectColor color;
 
@@ -697,15 +737,14 @@ abstract class Insect extends BoardEntity {
         this.color = color;
     }
 
-    public InsectColor getColor() {
-        return color;
-    }
-
     public abstract Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize);
 
     public abstract int travelDirection(Direction dir, Map<String, BoardEntity> boardData, int boardSize);
 }
 
+/**
+ * Interface DiagonalMoving.
+ */
 interface DiagonalMoving {
     public default int getDiagonalDirectionVisibleValue(Direction dir, EntityPosition entityPosition,
                                                         Map<String, BoardEntity> boardData, int boardSize) {
@@ -841,6 +880,9 @@ interface DiagonalMoving {
     }
 }
 
+/**
+ * Interface OrthogonalMoving.
+ */
 interface OrthogonalMoving {
     public default int getOrthogonalDirectionVisibleValue(Direction dir, EntityPosition entityPosition,
                                                           Map<String, BoardEntity> boardData, int boardSize) {
@@ -973,6 +1015,9 @@ interface OrthogonalMoving {
     }
 }
 
+/**
+ * Enumeration of directions.
+ */
 enum Direction {
     N("North"),
     E("East"),
@@ -994,6 +1039,9 @@ enum Direction {
     }
 }
 
+/**
+ * Enumeration of insect colors.
+ */
 enum InsectColor {
     RED, GREEN, BLUE, YELLOW;
 
