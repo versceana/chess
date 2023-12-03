@@ -1,13 +1,20 @@
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.LinkedList;
+import java.util.Scanner;
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
 
+/**
+ * The main class. Here we do reading of data of input file, checking and putting them to output file.
+ * We use java.io.File for file declaration, java.util.Scanner for reading from input file, java.io.BufferedWriter
+ * for writing in output file.
+ */
 public class Main {
-    private static Board gameBoard; //надо доделать
-
-    public static Board getGameBoard() {
-        return gameBoard;
-    }
-
+    private static Board gameBoard;
+    private static LinkedList<EntityPosition> insects = new LinkedList<>();
     public static void main(String[] args) {
         try {
             File input = new File("/Users/dianayakupova/IdeaProjects/chess/input.txt");
@@ -16,71 +23,116 @@ public class Main {
             BufferedWriter writer = new BufferedWriter(new FileWriter(output));
 
             // Read and validate the board size
-            int D = scanner.nextInt();
-            if (D < 4 || D > 1000) {
+            int d = scanner.nextInt();
+            final int a = 4;
+            final int b = 1000;
+            if (d < a || d > b) {
                 throw new InvalidBoardSizeException();
             }
-            gameBoard = new Board(D);
+            gameBoard = new Board(d);
 
             // Read and validate the number of insects
-            int N = scanner.nextInt();
-            if (N < 1 || N > 16) {
+            int n = scanner.nextInt();
+            final int c = 1;
+            final int z = 16;
+            if (n < c || n > z) {
                 throw new InvalidNumberOfInsectException();
             }
 
             // Read and validate the number of food points
-            int M = scanner.nextInt();
-            if (M < 1 || M > 200) {
+            int m = scanner.nextInt();
+            final int f = 200;
+            if (m < c || m > f) {
                 throw new InvalidNumberOfFoodPointsException();
             }
 
             // Read and validate the insects
-            for(int i = 0; i < N; i++) {
-                String[] text1;
-                text1 = scanner.nextLine().split(" "); //вот тут какая то лажа
-                String color = text1[0];
-                String type = text1[1];
-                int X1 = Integer.parseInt(text1[2]);
-                int Y1 = Integer.parseInt(text1[3]);
+            for (int i = 0; i < n; i++) {
+                String color = scanner.next();
+                String type = scanner.next();
+                int x = Integer.parseInt(scanner.next());
+                int y = Integer.parseInt(scanner.next());
                 // Validate the insect
-                if (!color.matches("Red|Green|Blue|Yellow")) { //нужно здесь вместо этой штуки энам использовать
+                if (!color.matches("Red|Green|Blue|Yellow")) {
                     throw new InvalidInsectColorException();
                 }
-
                 if (!type.matches("Ant|Butterfly|Spider|Grasshopper")) {
                     throw new InvalidInsectTypeException();
                 }
-                if (X1 < 1 || X1 > D || Y1 < 1 || Y1 > D) {
+                if (x < 1 || x > d || y < 1 || y > d) {
                     throw new InvalidEntityPositionException();
+                }
+                EntityPosition entityPosition = new EntityPosition(x, y);
+                InsectColor insectColor = InsectColor.toColor(color);
+                switch (type) {
+                    case "Ant":
+                        Insect ant = new Ant(entityPosition, insectColor);
+                        gameBoard.addEntity(ant);
+                        insects.add(entityPosition);
+                        break;
+                    case "Butterfly":
+                        Insect butterfly = new Butterfly(entityPosition, insectColor);
+                        gameBoard.addEntity(butterfly);
+                        insects.add(entityPosition);
+                        break;
+                    case "Spider":
+                        Insect spider = new Spider(entityPosition, insectColor);
+                        gameBoard.addEntity(spider);
+                        insects.add(entityPosition);
+                        break;
+                    default:
+                        Insect grasshopper = new Grasshopper(entityPosition, insectColor);
+                        gameBoard.addEntity(grasshopper);
+                        insects.add(entityPosition);
+                        break;
                 }
             }
 
             // Read and validate the food points
-            for(int i = 0; i < M; i++) {
-                String[] text2;
-                text2 = scanner.nextLine().split(" "); //лажа
-                int amount = Integer.parseInt(text2[0]); //не юзается а надо
-                int X2 = Integer.parseInt(text2[1]);
-                int Y2 = Integer.parseInt(text2[2]);
+            for (int i = 0; i < m; i++) {
+                int amount = Integer.parseInt(scanner.next());
+                int x = Integer.parseInt(scanner.next());
+                int y = Integer.parseInt(scanner.next());
 
-                if (X2 < 1 || X2 > D || Y2 < 1 || Y2 > D) {
+                if (x < 1 || x > d || y < 1 || y > d) {
                     throw new InvalidEntityPositionException();
                 }
+                EntityPosition entityPosition = new EntityPosition(x, y);
+                FoodPoint foodPoint = new FoodPoint(entityPosition, amount);
+                gameBoard.addEntity(foodPoint);
+            }
+            for (int i = 0; i < n; i++) {
+                writer.write(((Insect) gameBoard.getEntity(insects.get(i))).color.toString() + " ");
+                writer.write(((Insect) gameBoard.getEntity(insects.get(i))).getClass().getSimpleName() + " ");
+                if (((Insect) gameBoard.getEntity(insects.get(i))).getClass().getSimpleName().equals("Ant")) {
+                    writer.write(gameBoard.getDirection((Insect) gameBoard.getEntity(insects.get(i))).toString());
+                    writer.write(gameBoard.getDirectionSum((Insect) gameBoard.getEntity(insects.get(i))));
+                } else if (((Insect)
+                        gameBoard.getEntity(insects.get(i))).getClass().getSimpleName().equals("Butterfly")) {
+                    writer.write(gameBoard.getDirection((Insect) gameBoard.getEntity(insects.get(i))).toString());
+                    writer.write(gameBoard.getDirectionSum((Insect) gameBoard.getEntity(insects.get(i))));
+                } else if (((Insect)
+                        gameBoard.getEntity(insects.get(i))).getClass().getSimpleName().equals("Spider")) {
+                    writer.write(gameBoard.getDirection((Insect) gameBoard.getEntity(insects.get(i))).toString());
+                    writer.write(gameBoard.getDirectionSum((Insect) gameBoard.getEntity(insects.get(i))));
+                } else if (((Insect)
+                        gameBoard.getEntity(insects.get(i))).getClass().getSimpleName().equals("Grasshopper")) {
+                    writer.write(gameBoard.getDirection((Insect) gameBoard.getEntity(insects.get(i))).toString());
+                    writer.write(gameBoard.getDirectionSum((Insect) gameBoard.getEntity(insects.get(i))));
+                }
+
             }
             scanner.close();
             writer.close();
-
-            // Continue with the rest of the program ???????
-
-        } catch (IOException e) { //??????
+        } catch (IOException e) {
             e.printStackTrace();
-        } catch (InvalidBoardSizeException | InvalidNumberOfInsectException | InvalidNumberOfFoodPointsException |
-                 InvalidInsectTypeException | InvalidEntityPositionException | InvalidInsectColorException e) {
+        } catch (InvalidBoardSizeException | InvalidNumberOfInsectException | InvalidNumberOfFoodPointsException
+                 | InvalidInsectTypeException | InvalidEntityPositionException | InvalidInsectColorException e) {
             throw new RuntimeException(e);
         }
     }
-
 }
+
 class Board {
     private Map<String, BoardEntity> boardData;
     private int size;
@@ -90,21 +142,16 @@ class Board {
         this.boardData = new HashMap<>();
     }
 
-    //как что куда
     public void addEntity(BoardEntity entity) {
         boardData.put(entity.entityPosition.position(), entity);
     }
 
     public BoardEntity getEntity(EntityPosition position) {
-        return boardData.get(position.toString());
+        return boardData.get(position.position());
     }
-
-    //принимает насекомое и возвращает направление, которое это насекомое выберет.
     public Direction getDirection(Insect insect) {
         return insect.getBestDirection(boardData, size);
     }
-
-    // вызывает getDirection(), чтобы понять, куда пойдет насекомое, а затем возвращает количество собранной им пищи.
     public int getDirectionSum(Insect insect) {
         return insect.travelDirection(getDirection(insect), boardData, size);
     }
@@ -119,17 +166,17 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
 
     @Override
     public Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize) {
-        int maxFood = 0;
+        int food = 0;
         Direction bestDirection = Direction.N;
 
         // Check each direction
         for (Direction dir : Direction.values()) {
             // Calculate the new position based on the direction
-            EntityPosition newPosition = calculateNewPosition(this.entityPosition, dir);
+            EntityPosition newPosition = calculateNewPosition(entityPosition, dir);
 
             // Check if the new position is within the board
-            if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 ||
-                    newPosition.getY() > boardSize) {
+            if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1
+                    || newPosition.getY() > boardSize) {
                 continue;
             }
 
@@ -138,13 +185,8 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
 
             // If the new position contains food, check if it's more than the current max food
             if (entityAtNewPosition instanceof FoodPoint) {
-                int food = ((FoodPoint) entityAtNewPosition).value;
-                if (food > maxFood) {
-                    maxFood = food;
-                    bestDirection = dir;
-                }
-            } else {
-                return null;
+                food += ((FoodPoint) entityAtNewPosition).value;
+                boardData.remove(this.entityPosition.position());
             }
         }
 
@@ -155,7 +197,6 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
     @Override
     public int travelDirection(Direction dir, Map<String, BoardEntity> boardData, int boardSize) {
         int foodEaten = 0;
-        // эта херня написана слишком дохера раз везде
 
         while (true) {
             // Calculate the best direction
@@ -169,7 +210,7 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
 
             // If the new position contains food, eat it, else stop moving
             if (entityAtNewPosition instanceof FoodPoint) {
-                foodEaten += ((FoodPoint) entityAtNewPosition).value; //вот тут кладет как я поняла
+                foodEaten += ((FoodPoint) entityAtNewPosition).value;
                 boardData.remove(newPosition.toString());
             } else {
                 break;
@@ -184,6 +225,7 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
 
         return foodEaten;
     }
+
     @Override
     public int travelOrthogonally(Direction dir, EntityPosition entityPosition, InsectColor color, Map<String,
             BoardEntity> boardData, int boardSize) throws InvalidEntityPositionException {
@@ -195,11 +237,14 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
                                                   Map<String, BoardEntity> boardData, int boardSize) {
         return OrthogonalMoving.super.getOrthogonalDirectionVisibleValue(dir, entityPosition, boardData, boardSize);
     }
+
     @Override
     public int getDiagonalDirectionVisibleValue(Direction dir, EntityPosition entityPosition, Map<String, BoardEntity>
             boardData, int boardSize) throws InvalidEntityPositionException {
         return DiagonalMoving.super.getDiagonalDirectionVisibleValue(dir, entityPosition, boardData, boardSize);
     }
+
+    //
     @Override
     public int travelDiagonally(Direction dir, EntityPosition entityPosition, InsectColor color, Map<String,
             BoardEntity> boardData, int boardSize) throws InvalidEntityPositionException {
@@ -218,7 +263,7 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
             case E:
                 return new EntityPosition(entityPosition.getX(), entityPosition.getY() + 1);
             case S:
-                return new EntityPosition(entityPosition.getX() + 1 , entityPosition.getY());
+                return new EntityPosition(entityPosition.getX() + 1, entityPosition.getY());
             case W:
                 return new EntityPosition(entityPosition.getX(), entityPosition.getY() - 1);
             case NE:
@@ -234,6 +279,7 @@ class Ant extends Insect implements OrthogonalMoving, DiagonalMoving {
         return null;
     }
 }
+
 //Butterflies can move only vertically and horizontally.
 class Butterfly extends Insect implements OrthogonalMoving {
     public Butterfly(EntityPosition entityPosition, InsectColor color) {
@@ -243,6 +289,7 @@ class Butterfly extends Insect implements OrthogonalMoving {
     @Override
     public Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize) {
         int maxFood = 0;
+        int food = 0;
         Direction bestDirection = Direction.N;
 
         // Check each direction
@@ -251,8 +298,8 @@ class Butterfly extends Insect implements OrthogonalMoving {
             EntityPosition newPosition = calculateNewPosition(this.entityPosition, dir);
 
             // Check if the new position is within the board
-            if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 ||
-                    newPosition.getY() > boardSize) {
+            if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1
+                    || newPosition.getY() > boardSize) {
                 continue;
             }
 
@@ -306,6 +353,7 @@ class Butterfly extends Insect implements OrthogonalMoving {
 
         return foodEaten;
     }
+
     @Override
     public int travelOrthogonally(Direction dir, EntityPosition entityPosition, InsectColor color, Map<String,
             BoardEntity> boardData, int boardSize) throws InvalidEntityPositionException {
@@ -329,7 +377,7 @@ class Butterfly extends Insect implements OrthogonalMoving {
             case E:
                 return new EntityPosition(entityPosition.getX(), entityPosition.getY() + 1);
             case S:
-                return new EntityPosition(entityPosition.getX() + 1 , entityPosition.getY());
+                return new EntityPosition(entityPosition.getX() + 1, entityPosition.getY());
             case W:
                 return new EntityPosition(entityPosition.getX(), entityPosition.getY() - 1);
             default:
@@ -355,8 +403,8 @@ class Spider extends Insect implements DiagonalMoving {
             EntityPosition newPosition = calculateNewPosition(this.entityPosition, dir);
 
             // Check if the new position is within the board
-            if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 ||
-                    newPosition.getY() > boardSize) {
+            if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1
+                    || newPosition.getY() > boardSize) {
                 continue;
             }
 
@@ -410,11 +458,13 @@ class Spider extends Insect implements DiagonalMoving {
 
         return foodEaten;
     }
+
     @Override
     public int getDiagonalDirectionVisibleValue(Direction dir, EntityPosition entityPosition, Map<String, BoardEntity>
             boardData, int boardSize) throws InvalidEntityPositionException {
         return DiagonalMoving.super.getDiagonalDirectionVisibleValue(dir, entityPosition, boardData, boardSize);
     }
+
     @Override
     public int travelDiagonally(Direction dir, EntityPosition entityPosition, InsectColor color, Map<String,
             BoardEntity> boardData, int boardSize) throws InvalidEntityPositionException {
@@ -459,8 +509,8 @@ class Grasshopper extends Insect {
             EntityPosition newPosition = calculateNewPosition(this.entityPosition, dir);
 
             // Check if the new position is within the board
-            if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 ||
-                    newPosition.getY() > boardSize) {
+            if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1
+                    || newPosition.getY() > boardSize) {
                 continue;
             }
 
@@ -527,7 +577,7 @@ class Grasshopper extends Insect {
             case E:
                 return new EntityPosition(entityPosition.getX(), entityPosition.getY() + 2);
             case S:
-                return new EntityPosition(entityPosition.getX() + 2 , entityPosition.getY());
+                return new EntityPosition(entityPosition.getX() + 2, entityPosition.getY());
             case W:
                 return new EntityPosition(entityPosition.getX(), entityPosition.getY() - 2);
             default:
@@ -535,9 +585,10 @@ class Grasshopper extends Insect {
         return null;
     }
 }
-//тут намана
+
 class EntityPosition {
-    private int x, y;
+    private int x;
+    private int y;
 
     public EntityPosition(int x, int y) {
         this.x = x;
@@ -551,6 +602,7 @@ class EntityPosition {
     public int getY() {
         return y;
     }
+
     public String position() {
         return x + " " + y;
     }
@@ -565,51 +617,51 @@ class FoodPoint extends BoardEntity {
     }
 }
 
-class InvalidInsectColorException extends Exception{
-    public String getMassage(){
+class InvalidInsectColorException extends Exception {
+    public String getMassage() {
         return "Invalid insect color";
     }
 }
 
 class DuplicateInsectsException extends Exception {
-    public String getMassage(){
+    public String getMassage() {
         return "Duplicate insects";
     }
 }
 
 class InvalidBoardSizeException extends Exception {
-    public String getMassage(){
+    public String getMassage() {
 
         return "Invalid board size";
     }
 }
 
-class InvalidEntityPositionException extends Exception{
-    public String getMassage(){
+class InvalidEntityPositionException extends Exception {
+    public String getMassage() {
         return "Invalid entity position";
     }
 }
 
-class InvalidInsectTypeException extends Exception{
-    public String getMassage(){
+class InvalidInsectTypeException extends Exception {
+    public String getMassage() {
         return "Invalid insect type";
     }
 }
 
-class InvalidNumberOfFoodPointsException extends Exception{
-    public String getMassage(){
+class InvalidNumberOfFoodPointsException extends Exception {
+    public String getMassage() {
         return "Invalid number of food points";
     }
 }
 
 class InvalidNumberOfInsectException extends Exception {
-    public String getMassage(){
+    public String getMassage() {
         return "Invalid number of insects";
     }
 }
 
 class TwoEntitiesOnSamePositionException extends Exception {
-    public String getMassage(){
+    public String getMassage() {
         return "Two entities in the same position";
     }
 }
@@ -626,6 +678,10 @@ abstract class Insect extends BoardEntity {
         this.color = color;
     }
 
+    public InsectColor getColor() {
+        return color;
+    }
+
     public abstract Direction getBestDirection(Map<String, BoardEntity> boardData, int boardSize);
 
     public abstract int travelDirection(Direction dir, Map<String, BoardEntity> boardData, int boardSize);
@@ -633,13 +689,14 @@ abstract class Insect extends BoardEntity {
 
 interface DiagonalMoving {
     public default int getDiagonalDirectionVisibleValue(Direction dir, EntityPosition entityPosition,
-                                                Map<String, BoardEntity> boardData, int boardSize) throws InvalidEntityPositionException {
+                                                        Map<String, BoardEntity> boardData, int boardSize)
+            throws InvalidEntityPositionException {
         // Calculate the new position based on the direction
         EntityPosition newPosition = calculateNewPosition(entityPosition, dir);
 
         // Check if the new position is within the board
-        if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 ||
-                newPosition.getY() > boardSize) {
+        if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1
+                || newPosition.getY() > boardSize) {
             return 0;
         }
 
@@ -656,13 +713,14 @@ interface DiagonalMoving {
     }
 
     public default int travelDiagonally(Direction dir, EntityPosition entityPosition, InsectColor color,
-                                Map<String, BoardEntity> boardData, int boardSize) throws InvalidEntityPositionException {
+                                        Map<String, BoardEntity> boardData, int boardSize)
+            throws InvalidEntityPositionException {
         // Calculate the new position based on the direction
         EntityPosition newPosition = calculateNewPosition(entityPosition, dir);
 
         // Check if the new position is within the board
-        if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 ||
-                newPosition.getY() > boardSize) {
+        if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1
+                || newPosition.getY() > boardSize) {
             return 0;
         }
 
@@ -679,7 +737,9 @@ interface DiagonalMoving {
         // Otherwise, return 0
         return 0;
     }
-    private EntityPosition calculateNewPosition(EntityPosition entityPosition, Direction direction) throws InvalidEntityPositionException {
+
+    private EntityPosition calculateNewPosition(EntityPosition entityPosition, Direction direction)
+            throws InvalidEntityPositionException {
         switch (direction) {
             case NE:
                 return new EntityPosition(entityPosition.getX() - 1, entityPosition.getY() + 1);
@@ -697,12 +757,13 @@ interface DiagonalMoving {
 
 interface OrthogonalMoving {
     public default int getOrthogonalDirectionVisibleValue(Direction dir, EntityPosition entityPosition,
-                                                  Map<String, BoardEntity> boardData, int boardSize) {
+                                                          Map<String, BoardEntity> boardData, int boardSize) {
         // Calculate the new position based on the direction
         EntityPosition newPosition = calculateNewPosition(entityPosition, dir);
 
         // Check if the new position is within the board
-        if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 || newPosition.getY() > boardSize) {
+        if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 || newPosition.getY()
+                > boardSize) {
             return 0;
         }
 
@@ -719,12 +780,13 @@ interface OrthogonalMoving {
     }
 
     public default int travelOrthogonally(Direction dir, EntityPosition entityPosition, InsectColor color,
-                                  Map<String, BoardEntity> boardData, int boardSize) throws InvalidEntityPositionException {
+                                          Map<String, BoardEntity> boardData, int boardSize)
+            throws InvalidEntityPositionException {
         // Calculate the new position based on the direction
         EntityPosition newPosition = calculateNewPosition(entityPosition, dir);
         // Check if the new position is within the board
-        if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1 ||
-                newPosition.getY() > boardSize) {
+        if (newPosition.getX() < 1 || newPosition.getX() > boardSize || newPosition.getY() < 1
+                || newPosition.getY() > boardSize) {
             return 0;
         }
 
@@ -741,6 +803,7 @@ interface OrthogonalMoving {
         // Otherwise, return 0
         return 0;
     }
+
     private EntityPosition calculateNewPosition(EntityPosition entityPosition, Direction direction) {
         return getEntityPosition(entityPosition, direction);
     }
@@ -752,7 +815,7 @@ interface OrthogonalMoving {
             case E:
                 return new EntityPosition(entityPosition.getX(), entityPosition.getY() + 1);
             case S:
-                return new EntityPosition(entityPosition.getX() + 1 , entityPosition.getY());
+                return new EntityPosition(entityPosition.getX() + 1, entityPosition.getY());
             case W:
                 return new EntityPosition(entityPosition.getX(), entityPosition.getY() - 1);
             default:
@@ -777,7 +840,7 @@ enum Direction {
         this.textRepresentation = text;
     }
 
-    public String getTextRepresentation() { //надо юзать в output.txt
+    public String getTextRepresentation() {
         return this.textRepresentation;
     }
 }
